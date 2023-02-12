@@ -35,7 +35,7 @@ def preprocess_image(image_path,resize=False):
         img = cv2.resize(img, (224,224))
     return img
 
-def get_plate(image_path, wpod_net, Dmax=608, Dmin = 256):
+def get_plate(image_path, Dmax=608, Dmin = 256):
     vehicle = preprocess_image(image_path)
     ratio = float(max(vehicle.shape[:2])) / min(vehicle.shape[:2])
     side = int(ratio * Dmin)
@@ -59,13 +59,11 @@ def predict_from_model(image,model,labels):
     return prediction
 
 def detect_license_number(image_path):
-    wpod_net_path = "wpod-net.json"
-    wpod_net = load_model(wpod_net_path)
     test_image_path = image_path # "Plate_examples/dacia_duster_5.jpg"
     #Volkswagen_Transporter_1.jpg
     #dacia_duster_2.jpg
     #dacia_duster_5.jpg
-    vehicle, LpImg,cor = get_plate(test_image_path, wpod_net)
+    vehicle, LpImg,cor = get_plate(test_image_path)
 
     if (len(LpImg)): #check if there is at least one license image
         # Scales, calculates absolute values, and converts the result to 8-bit.
@@ -107,21 +105,24 @@ def detect_license_number(image_path):
         
         print("Detect {} letters...".format(len(crop_characters)))
 
-        # Load model architecture, weight and labels
-        json_file = open('MobileNets_character_recognition.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        model = model_from_json(loaded_model_json)
-        model.load_weights("License_character_recognition_weight.h5")
-        # print("[INFO] Model loaded successfully...")
-
-        labels = LabelEncoder()
-        labels.classes_ = np.load('license_character_classes.npy')
-        # print("[INFO] Labels loaded successfully...")
-
         final_string = ''
         for i,character in enumerate(crop_characters):
             title = np.array2string(predict_from_model(character,model,labels))
             final_string+=title.strip("'[]")
 
         return final_string
+
+wpod_net_path = "wpod-net.json"
+wpod_net = load_model(wpod_net_path)
+
+# Load model architecture, weight and labels
+json_file = open('MobileNets_character_recognition.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+model = model_from_json(loaded_model_json)
+model.load_weights("License_character_recognition_weight.h5")
+print("[INFO] Model loaded successfully...")
+
+labels = LabelEncoder()
+labels.classes_ = np.load('license_character_classes.npy')
+print("[INFO] Labels loaded successfully...")
