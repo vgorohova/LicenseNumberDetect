@@ -9,10 +9,12 @@ import matplotlib.gridspec as gridspec
 from local_utils import detect_lp
 from os.path import splitext,basename
 from keras.models import model_from_json
-# from keras.preprocessing.image import load_img, img_to_array
-# from keras.applications.mobilenet_v2 import preprocess_input
+from keras.preprocessing.image import load_img, img_to_array
+from keras.applications.mobilenet_v2 import preprocess_input
 from sklearn.preprocessing import LabelEncoder
-# import glob
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+import glob
 
 # Extract license plate from sample image
 def load_model(path):
@@ -112,17 +114,18 @@ def detect_license_number(image_path):
 
         return final_string
 
-wpod_net_path = "wpod-net.json"
+# wpod_net_path = "wpod-net.json"
+wpod_net_path ="D:/Personal/UTM/MastersDegree/Proiect-IoT/LicenseNumberDetect/wpod-net.json"
 wpod_net = load_model(wpod_net_path)
 
 # Load model architecture, weight and labels
-json_file = open('MobileNets_character_recognition.json', 'r')
+json_file = open('D:/Personal/UTM/MastersDegree/Proiect-IoT/LicenseNumberDetect/MobileNets_character_recognition.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 model = model_from_json(loaded_model_json)
-model.load_weights("License_character_recognition_weight.h5")
+model.load_weights("D:/Personal/UTM/MastersDegree/Proiect-IoT/LicenseNumberDetect/License_character_recognition_weight.h5")
 print("[INFO] Model loaded successfully...")
 
 labels = LabelEncoder()
-labels.classes_ = np.load('license_character_classes.npy')
+labels.classes_ = np.load('D:/Personal/UTM/MastersDegree/Proiect-IoT/LicenseNumberDetect/license_character_classes.npy')
 print("[INFO] Labels loaded successfully...")
